@@ -1,11 +1,11 @@
 # SystemDesignNotes
 
 
-# Indexing Data Structures in Database Systems
+## Indexing Data Structures in Database Systems
 
 A comprehensive understanding of indexing data structures is crucial for database management and system design. Below, we discuss various data structures and their significance in indexing.
 
-## Skiplist
+### Skiplist
 
 **What it is:** 
 A skiplist is a data structure that allows fast search within an ordered sequence of elements. It consists of multiple layers with the bottom layer containing all elements and each higher layer serving as an express lane with fewer elements for quicker access.
@@ -16,7 +16,7 @@ It's like a multi-level shopping mall where express escalators take you past a s
 **Use case:** 
 Used in Redis for its capabilities of fast insertion, deletion, and lookup operations which are vital for a caching system's performance.
 
-## Hash Index
+### Hash Index
 
 **What it is:** 
 A hash index is implemented using a hash table where a hash function maps keys to array indices correlating to value storage locations.
@@ -27,7 +27,7 @@ Like a book index that tells you the exact pages to find a word on, allowing dir
 **Use case:** 
 Ideal for direct point queries with known keys, typically employed for primary key lookups in databases.
 
-## SSTable (Sorted String Table)
+### SSTable (Sorted String Table)
 
 **What it is:** 
 An SSTable is a read-only data structure storing key-value pairs in sorted order on disk, facilitating efficient range queries.
@@ -38,7 +38,7 @@ Similar to a telephone directory that lists contacts by last name, enabling quic
 **Use case:** 
 Used by systems like Bigtable and Cassandra for managing large datasets where sorted data enhances the efficiency of range scans.
 
-## LSM tree (Log-Structured Merge-Tree)
+### LSM tree (Log-Structured Merge-Tree)
 
 **What it is:** 
 An LSM tree is a strategy that combines the in-memory efficiency of skiplists for writes with the on-disk persistence and organization of SSTables.
@@ -49,7 +49,7 @@ Comparable to jotting quick notes on sticky notes (in-memory) and later sorting 
 **Use case:** 
 Optimized for environments with high write volume, reducing disk I/O which is common in databases like LevelDB.
 
-## B-tree
+### B-tree
 
 **What it is:** 
 A B-tree is a self-balancing tree structure that keeps data sorted and allows efficient operations logarithmically with respect to the number of items.
@@ -71,7 +71,7 @@ Works as the reverse of a book index by providing the locations of words across 
 **Use case:** 
 Extremely useful in search engines such as Lucene, which is at the core of Elasticsearch, for full-text searches.
 
-## Suffix Tree
+### Suffix Tree
 
 **What it is:** 
 A suffix tree represents all possible suffixes of a given string as paths from a common root, optimizing substring searches.
@@ -82,7 +82,7 @@ Imagine a family tree for words, with endings branching out, showing the lineage
 **Use case:** 
 Primarily used for quick pattern searches in strings, such as DNA sequencing in bioinformatics.
 
-## R-tree
+### R-tree
 
 **What it is:** 
 An R-tree indexes spatial data, handling dimensions efficiently for queries on geographic location-based data.
