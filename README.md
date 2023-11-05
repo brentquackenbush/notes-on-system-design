@@ -170,3 +170,48 @@ Caching is a critical performance optimization strategy used across various laye
 - **Query Performance:** Providing faster response times for reporting and business intelligence applications.
 - **Data Integrity:** Maintaining consistent data states across replicated environments and during system failures.
 
+## Load Balancer and API Gateway: An Overview
+
+### Load Balancer
+Its primary function is to distribute incoming network traffic across multiple servers to ensure no single server becomes overloaded, improving the reliability and availability of applications. Load balancers operate at various levels of the OSI model; some work on the transport layer (Layer 4 - TCP/UDP) to distribute traffic based on IP range or port number, while others work on the application layer (Layer 7 - HTTP/HTTPS) to distribute requests based on content type, headers, cookies, or application-specific data.
+
+### API Gateway
+It acts as a front-door to facilitate and manage incoming API requests to backend services. An API gateway typically handles a host of concerns, such as request routing, composition, and protocol translation, and often includes additional responsibilities like authentication, rate limiting, and analytics.
+
+## Which Comes First: Load Balancer or API Gateway?
+
+### Entry Point
+The load balancer acts as the initial entry point for all incoming traffic. It's responsible for ensuring that user requests are distributed such that no single entry point becomes a bottleneck or single point of failure.
+
+### High Availability
+By placing the load balancer at the forefront, you can provision multiple instances of your API gateway to ensure high availability. The load balancer can then distribute incoming API requests across these various gateway instances.
+
+### Auto Scaling
+In cloud environments, load balancers integrate with auto-scaling groups that dynamically adjust the number of API gateway instances based on demand. This scalability is critical during traffic spikes.
+
+### Edge Routing
+The load balancer can also serve as an edge router, making routing decisions based on simple factors like domain name or path prefix before passing traffic to the more complex routing logic within the API gateway.
+
+### Security
+By positioning the load balancer in front, any potential DDoS attack or traffic surge is managed at the network's edge, reducing exposure to the API gateway and the internal services.
+
+### SSL Termination
+Load balancers often handle SSL termination, decrypting incoming requests and then passing on unencrypted traffic to the API gateway. This offloads the cryptographic workload from the API gateway.
+
+## Detailed Interaction
+
+### Traffic Entry
+Requests enter the system and hit the load balancer first. The load balancer performs health checks on API gateway instances to ensure traffic is only sent to operational nodes.
+
+### SSL Termination
+If SSL Termination is used, the load balancer decrypts the request to read certain details if needed for intelligent distribution, then re-encrypts if required before passing it along.
+
+### Routing to API Gateway
+After initial processing, the load balancer forwards the request to the API gateway. If the system uses multiple gateways for different services or API versions, the load balancer can direct traffic based on the intended destination.
+
+### Processing by API Gateway
+The API gateway receives the request from the load balancer. It then performs various functions such as authentication, rate limiting, and request shaping. The gateway reads the request headers and URL to determine how to route the request to the appropriate services.
+
+### Service Invocation
+Finally, the API gateway sends the request to the correct service within the internal network. This service then processes the request and sends the response back through the API gateway and load balancer to the client.
+
