@@ -60,7 +60,7 @@ Resembles a filing cabinet with well-organized folders allowing quick access, ad
 **Use case:** 
 Widely used in SQL databases such as MySQL for achieving consistent performance across read and write operations.
 
-## Inverted Index
+### Inverted Index
 
 **What it is:** 
 An inverted index associates content like words or numbers with locations in a document or a set of documents.
