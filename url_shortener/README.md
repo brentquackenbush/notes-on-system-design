@@ -65,12 +65,13 @@ Given the 200:1 read/write ratio, the redirections per second can be estimated a
 
 ### Memory and Caching Strategy
 
-**Daily Redirection Requests**: Based on the estimated redirection rate of 8000 URLs/second:
+* **Daily Redirection Requests**: Based on the estimated redirection rate of 8000 URLs/second:
 
-**Daily requests**: 8000 requests/second * 86400 seconds/day ≈ 700 million requests/day.
+* **Daily requests**: 8000 requests/second * 86400 seconds/day ≈ 700 million requests/day.
 
-**Caching Strategy**: Applying the [_80:20 Pareto Principle_](https://en.wikipedia.org/wiki/Pareto_principle), where 80% of the requests might be for 20% of the URLs.
-To cache these popular URLs, the memory requirement can be approximated as: 20% of 700 million * 500 bytes ≈ 70 gigabytes (GB).
+* **Caching Strategy**: Applying the [_80:20 Pareto Principle_](https://en.wikipedia.org/wiki/Pareto_principle), where 80% of the requests might be for 20% of the URLs.
+  
+> To cache these popular URLs, the memory requirement can be approximated as: 20% of 700 million * 500 bytes ≈ 70 gigabytes (GB).
 
 ### Summary Estimates
 
