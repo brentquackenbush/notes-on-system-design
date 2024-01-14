@@ -146,7 +146,6 @@ To cache these popular URLs, the memory requirement can be approximated as: 20% 
 > 5. **Database and Cache**: The application server may interact with a database to retrieve or store information and with a cache to access frequently requested data quickly.
 
 ## REST Endpoints
-
 ### 1. Create Short URL Endpoint
 
 - **Endpoint**: `POST /v1/create`
@@ -169,6 +168,7 @@ To cache these popular URLs, the memory requirement can be approximated as: 20% 
       } 
   ```
   - Error: Returns an appropriate error message and status code for failures (e.g., invalid URL format).
+
 ### 2. URL Redirection Endpoint
 - **Endpoint**: `GET v1/{short_url}`
 - **Purpose**: To redirect a short URL to its corresponding long URL.
@@ -181,21 +181,24 @@ To cache these popular URLs, the memory requirement can be approximated as: 20% 
 ## URL Shortening Algorithms
 
 ### A. URL Encoding
+
   - [Base62 Encoding](https://en.wikipedia.org/wiki/Base62): Utilizes a character set of 62 (a-z, A-Z, 0-9) for URL encoding. Efficient for producing relatively short URLs.
   - [MD5 Encoding](https://www.md5hashgenerator.com/): Uses MD5 hashing to generate a hash of the original URL, then uses a portion of the hash for the short URL. This method may introduce collision risks and requires collision handling.
 
 ### B. Key Generation Service (KGS)
+
   - A pre-emptive key generation approach where short URLs are generated and stored beforehand. When a new short URL is requested, a pre-generated key is assigned, ensuring uniqueness and reducing runtime collision risks.
 
 ## Database Schema
-
 ### User Data Schema (Optional for Future Implementation)
+
 - **User ID**: Unique identifier for each user.
 - **Name**: User's name.
 - **Email**: User's email address.
 - **Creation Date**: Date of user registration.
 
 ### ShortLink Data Schema
+
 - **Short URL**: Unique short URL (6-7 characters long).
 - **Original URL**: The original, long URL.
 - **User ID**: Identifier of the user who created the short URL (optional, for future use).
