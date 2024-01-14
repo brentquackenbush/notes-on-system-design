@@ -155,7 +155,7 @@ To cache these popular URLs, the memory requirement can be approximated as: 20% 
   ```json
   {
     "long_url": "http://example.com/longurlpath",
-    "custom_url": "CustomShortLink" // Optional
+    "custom_url": "CustomShortLink" 
   }
   ```
 - **Parameters**:
