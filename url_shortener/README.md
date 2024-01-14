@@ -170,6 +170,7 @@ To cache these popular URLs, the memory requirement can be approximated as: 20% 
   - Error: Returns an appropriate error message and status code for failures (e.g., invalid URL format).
 
 ### 2. URL Redirection Endpoint
+
 - **Endpoint**: `GET v1/{short_url}`
 - **Purpose**: To redirect a short URL to its corresponding long URL.
 - **Parameters**:
