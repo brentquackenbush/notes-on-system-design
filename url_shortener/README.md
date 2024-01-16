@@ -204,3 +204,62 @@ Given the 200:1 read/write ratio, the redirections per second can be estimated a
 - **Short URL**: Unique short URL (6-7 characters long).
 - **Original URL**: The original, long URL.
 - **User ID**: Identifier of the user who created the short URL (optional, for future use).
+
+## Low-level Design
+
+### Leveraging Cache
+
+For the caching layer, we'll want a system that:
+
+> - **Is Fast**: It must serve requests with minimal latency to ensure quick redirections.
+> - **Supports High Throughput**: The cache should handle a large number of reads and writes per second.
+> - **Offers High Availability**: It should have mechanisms in place to ensure it is resilient to failures.
+> - **Provides Eviction Policies**: It should have configurable eviction policies to maintain a fresh and relevant set of data (like LRU - Least Recently Used).
+
+Given these criteria, **Redis** is a frequent choice for the following reasons:
+
+- **Performance**: Redis is an in-memory data store, which means it can serve read and write operations with sub-millisecond latency. Support for Complex Data Types: It supports strings, hashes, lists, sets, and sorted sets, which can be leveraged for various caching strategies.
+- **Scalability**: Redis can be scaled out through clustering to handle increased load.
+- **Durability**: With Redis, you have the option to persist data on disk, which can prevent data loss in case of a system crash.
+- **Rich Feature Set**: Includes built-in replication, Lua scripting, LRU eviction, transactions, and different levels of on-disk persistence.
+
+[A great read on the differences between memcached and redis.](https://engineering.kablamo.com.au/posts/2021/memcached-vs-redis-whats-the-difference/)
+
+### What Type of Database?
+For the database, considering that you need to store URLs with high availability and consistent performance, a NoSQL database like **MongoDB** is suitable due to:
+
+- **Scalability**: MongoDB provides horizontal scalability with sharding, which is crucial for handling a large dataset and high throughput.
+- **Flexibility**: The schema-less nature of MongoDB allows you to easily evolve your data schema without downtime.
+- **Replication**: MongoDB’s replication facility provides automatic failover and data redundancy, which is crucial for achieving high availability.
+- **Aggregation Framework**: Offers powerful data processing and aggregation capabilities that
+can be useful for generating analytics about the URLs such as click counts, geographical distribution of access, etc.
+
+- **Query Performance**: MongoDB's indexing strategies enable efficient queries, which would be beneficial for quick lookups of URL mappings.
+
+**Developer Ecosystem**: MongoDB has a large ecosystem, making it easier to find support and resources for development.
+
+### Considerations for Cache and Database Choice
+
+Cache:
+
+- **Invalidation Strategy**: It is important to determine how cached data will be invalidated or refreshed. For instance, if a short URL is deleted or updated, the cache must reflect these changes immediately.
+- **Cache Warm-up**: Decide on strategies for warming up the cache, ensuring that frequently accessed data is pre-loaded into the cache after a cold start or a flush.
+- **Resilience**: Consider adding redundancy to the cache layer, such as having multiple Redis nodes in different availability zones.
+
+Database:
+
+- **Data Modeling**: For MongoDB, consider how you will structure the ShortLink data schema. Since writes are less frequent compared to reads, denormalizing the data and embedding user information with URL data could be beneficial for read performance.
+- **Indexing**: Proper indexing on both the short URL for quick retrieval and on user-related data for analytics will be essential.
+- **Shard Key Selection**: If you plan to shard your MongoDB collection, selecting an effective shard key is critical for ensuring an even distribution of data across shards.
+
+### Integration of Cache and Database
+
+The application servers will interact with both the cache and database:
+
+**Read Flow**: When a client requests a URL redirection, the application server will first check the cache. If there is a cache miss, it will then query MongoDB and update the cache accordingly.
+
+**Write Flow**: When a new URL is shortened, the application server will write to MongoDB and also update the cache to reflect the new entry.
+
+**Synchronization**: Ensure that the cache and database are kept in sync. This might involve cache invalidation strategies whenever the underlying data changes.
+
+![URL_SHORTENER_WHITEBOARD.png](URL_SHORTENER_WHITEBOARD.png)
