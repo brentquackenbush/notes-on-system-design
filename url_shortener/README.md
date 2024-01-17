@@ -228,45 +228,52 @@ Given these criteria, **Redis** is a frequent choice for the following reasons:
 ### What Type of Database?
 For the database, considering that you need to store URLs with high availability and consistent performance, a NoSQL database like **MongoDB** is suitable due to:
 
-- **Scalability**: MongoDB provides horizontal scalability with sharding, which is crucial for handling a large dataset and high throughput.
-- **Flexibility**: The schema-less nature of MongoDB allows you to easily evolve your data schema without downtime.
-- **Replication**: MongoDB’s replication facility provides automatic failover and data redundancy, which is crucial for achieving high availability.
-- **Aggregation Framework**: Offers powerful data processing and aggregation capabilities that
-can be useful for generating analytics about the URLs such as click counts, geographical distribution of access, etc.
+#### Choosing MongoDB for URL Shortener Service
 
-- **Query Performance**: MongoDB's indexing strategies enable efficient queries, which would be beneficial for quick lookups of URL mappings.
+- **Rationale for MongoDB**:
+MongoDB is chosen for its flexibility, scalability, and performance characteristics which are well-suited for a URL shortener service that requires high read/write throughput and efficient storage of simple key-value pairs.
 
-**Developer Ecosystem**: MongoDB has a large ecosystem, making it easier to find support and resources for development.
+- **Schema-less Nature**: Allows for flexibility in data modeling, which is beneficial for the evolving requirements of a URL shortener service.
+- **Performance**:
+Offers high-performance data retrieval using indexing, which is critical for the quick resolution of short URLs.
 
-### Considerations for Cache and Database Choice
+- **Scalability**: Native sharding and replication support make it a good fit for distributed systems that need to handle large amounts of traffic and data.
+- **Developer Friendly**: Rich ecosystem and drivers for various programming languages, including Kotlin, facilitate ease of development and integration.
 
-Cache:
+### MongoDB Data Model:
+#### Collections/Data Structures:
 
-- **Invalidation Strategy**: It is important to determine how cached data will be invalidated or refreshed. For instance, if a short URL is deleted or updated, the cache must reflect these changes immediately.
-- **Cache Warm-up**: Decide on strategies for warming up the cache, ensuring that frequently accessed data is pre-loaded into the cache after a cold start or a flush.
-- **Resilience**: Consider adding redundancy to the cache layer, such as having multiple Redis nodes in different availability zones.
+- `Users`: Stores user information for potential future features like dashboard access, link management, etc.
+- `ShortLinks`: Stores the mappings between short and original URLs.
 
-Database:
+#### ShortLinks Collection Schema:
 
-- **Data Modeling**: For MongoDB, consider how you will structure the ShortLink data schema. Since writes are less frequent compared to reads, denormalizing the data and embedding user information with URL data could be beneficial for read performance.
-- **Indexing**: Proper indexing on both the short URL for quick retrieval and on user-related data for analytics will be essential.
-- **Shard Key Selection**: If you plan to shard your MongoDB collection, selecting an effective shard key is critical for ensuring an even distribution of data across shards.
+```kotlin
+data class ShortLink(
+    val id: ObjectId, // MongoDB unique identifier, usually named _id
+    val shortUrl: String,
+    val originalUrl: String,
+    val creationDate: Date,
+    val userId: String? = null // nullable for optional user ID
+)
+```
 
-### Integration of Cache and Database
+Users Collection Schema:
 
-The application servers will interact with both the cache and database:
-
-**Read Flow**: When a client requests a URL redirection, the application server will first check the cache. If there is a cache miss, it will then query MongoDB and update the cache accordingly.
-
-**Write Flow**: When a new URL is shortened, the application server will write to MongoDB and also update the cache to reflect the new entry.
-
-**Synchronization**: Ensure that the cache and database are kept in sync. This might involve cache invalidation strategies whenever the underlying data changes.
+```kotlin
+data class User(
+  val id: ObjectId, // MongoDB unique identifier, usually named _id
+  val username: String,
+  val email: String,
+  val creationDate: Date
+)
+```
 
 ### Apache Kafka in a Distributed System
 
 > **Apache Kafka** is a distributed event streaming platform that is designed to handle high volumes of data and enables the building of real-time streaming data pipelines and applications.
 
-**Role of Kafka**:
+### **Role of Kafka**:
 - **Event Publishing**: Services within the distributed system (like the URL redirection service) publish events to Kafka. These events can be anything of significance - for instance, every time a short URL is clicked, an event is created with details about the click.
 
 - **Event Storage**: Kafka stores these events in a fault-tolerant manner across its distributed architecture. It ensures that data is replicated so that no information is lost if a broker (Kafka server) fails.
@@ -280,13 +287,6 @@ Kafka Producers and Consumers:
 - **Producers**: The URL redirection service acts as a Kafka producer when it sends a message (event) to the Kafka topic.
 - **Consumers**: The analytics processing service acts as a Kafka consumer. It might use Kafka's Streams API for real-time processing or connect to a batch processing system like Apache Spark for heavier analytics tasks.
 
-### Data Flow with Kafka:
-
-1. **Data Ingestion**: The URL redirection service captures click events and sends them to Kafka as they happen.
-2. **Stream Processing**: Kafka Streams or another streaming service processes these events in real-time if needed.
-3. **Batch Processing**: For non-immediate analytics needs, a batch processor may periodically pull events from Kafka.
-4. **Persistence**: After processing, the data is persisted in a data warehouse for long-term storage and analysis.
-
 ### Data Warehouse in a Distributed System
 
 > A data warehouse is a centralized repository for storing large amounts of structured, filtered data that has been processed for a specific purpose.
@@ -298,6 +298,11 @@ Role of Data Warehouse:
 1. **Data Storage**: It stores large volumes of data in a structured format, optimized for query performance and analysis.
 2. **Data Analysis**: It allows for complex queries, aggregations, and analysis across large datasets.
 3. **Business Intelligence**: It serves as the source of data for business intelligence tools and dashboards.
+
+### Data Warehouse Configurations:
+
+- **Star Schema**: Often data warehouses are structured in a star schema for analytics, with fact tables (like clicks) and dimension tables (like users, urls).
+- **Data Lifecycle**: Policies for data lifecycle management, including archiving old data and purging data that is no longer needed, while ensuring compliance with data retention policies.
 
 ### Low-Level Detail of Data Flow:
 
@@ -320,16 +325,5 @@ Role of Data Warehouse:
 7. **Analysis and Reporting**:
 - **BI Tools**: Business intelligence tools such as Tableau, Looker, or Power BI connect to the data warehouse to create reports and dashboards.
 - **Custom Analytics Applications**: If you have custom analytics needs, you might also have applications or services that query the data warehouse directly to serve specific analytical data to users or other systems.
-
-### Low-Level Kafka Configuration:
-
-- **Partitions**: Kafka topics are split into partitions to allow for parallelism in both writing and reading data. The number of partitions is configured based on throughput needs.
-- **Replication Factor**: Each partition is replicated across multiple Kafka brokers to ensure high availability and fault tolerance.
-- **Retention Policy**: Kafka topics have a retention policy that determines how long messages are kept. For analytics, you might have a larger retention window or even use Kafka's log compaction feature.
-
-### Data Warehouse Configurations:
-
-- **Star Schema**: Often data warehouses are structured in a star schema for analytics, with fact tables (like clicks) and dimension tables (like users, urls).
-- **Data Lifecycle**: Policies for data lifecycle management, including archiving old data and purging data that is no longer needed, while ensuring compliance with data retention policies.
 
 ![URL_SHORTENER_WHITE_BOARD.png](URL_SHORTENER_WHITE_BOARD.png)
