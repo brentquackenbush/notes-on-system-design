@@ -190,3 +190,38 @@ Before we start, I want to mention that it is of up-most importance we comply wi
 - **Handling Data Anomalies**:
   - Prevents "dirty writes" and race conditions, common in non-ACID compliant databases, ensuring reliable and consistent transaction processing.
 
+### Leveraging Cache
+
+Let's talk about giving our system a turbo boost. How? By smartly caching currency rates. Imagine this: every time someone asks for a currency rate, we go out and fetch it from the Forex market. That's a lot of trips for something that changes just a few times a day, right?
+
+#### Enter Redis: Our Caching Superhero
+- **Why Redis?** It's like having a super-fast memory bank. Redis stores data right where we can access it instantly. This means we can remember the latest currency rates without having to ask the Forex market every time.
+- **Staying Up-to-Date**: We'll make sure our Redis cache doesn't hold onto outdated rates for too long. It's all about giving you the freshest data without the wait.
+- **Plan B**: Missed the rate in our cache? No worries, we'll fetch it and remember it for next time.
+
+In short, by using Redis, we're not only speeding things up but also making sure you always get the latest and greatest rates without unnecessary delays. Fast, efficient, and smart - that's how we like it!
+
+### Supercharging Our System with Apache Kafka
+
+Hello Team! Let’s explore how Apache Kafka, our data handling powerhouse, is driving efficiency in our currency exchange platform.
+
+#### Kafka: The Heartbeat of Our Messaging System
+
+- **The Heavy Lifter**: Kafka is our go-to for managing the deluge of messages, adept at handling billions seamlessly – vital for our Money Transfer and Currency Exchange operations.
+- **Reliability is Key**: Kafka's distributed setup ensures we're always up, avoiding any service interruptions.
+- **Speed is King**: For real-time data streaming and quick transaction processing, Kafka is unbeatable.
+- **Seamless Communication**: Kafka ensures smooth, orderly messaging across services like Account Management and Currency Exchange.
+
+#### Kafka in Action
+
+- **Money Transfer Service**: Kafka meticulously queues and processes each money transfer request, guaranteeing efficient and orderly handling.
+- **Currency Exchange Service**: Acting like a real-time news channel, Kafka disseminates current currency exchange rates, ensuring our customers get the best deals.
+- **Account Management Service**: Kafka meticulously records every account activity, aiding in accurate auditing and compliance.
+
+#### Our Kafka Strategy
+
+- **Producers and Consumers**: Our services communicate seamlessly with Kafka, ensuring a synchronized flow of information.
+- **Stream Processing**: Kafka isn't just about messaging; it's a whiz at real-time data analysis, making sense of our operations on the go.
+
+With Kafka, we’re not just keeping pace – we’re setting the pace in the financial tech world.
+
