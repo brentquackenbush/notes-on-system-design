@@ -27,6 +27,7 @@
 6. [Shared Nothing Architecture](#shared-nothing-architecture)
 7. [Shared Everything Architecture](#shared-everything-architecture)
 8. [Comparison and Context in Distributed Systems](#comparison-and-context-in-distributed-systems)
+9. [OAuth 2.0 and OpenID Connect](#oauth-20-and-openid-connect)
 
 <a name="indexing-data-structures-in-database-systems"></a>
 ## Indexing Data Structures in Database Systems
@@ -266,7 +267,6 @@ Load balancers often handle SSL termination, decrypting incoming requests and th
 **Example:**
 - Think of a large, central library where everyone in town comes to share books and resources. If a popular book is in use by someone, others must wait their turn.
 
-
 <a name="comparison-and-context-in-distributed-systems"></a>
 ## Comparison and Context in Distributed Systems
 
@@ -276,3 +276,77 @@ Load balancers often handle SSL termination, decrypting incoming requests and th
 - **Complexity:** Shared Nothing is simpler in terms of resource management but requires more sophisticated strategies for data distribution and coordination.
 
 In summary, the choice between Shared Nothing and Shared Everything architectures depends on the specific requirements and constraints of the system you're designing. Shared Nothing is favored for systems that require linear scalability and high fault tolerance, while Shared Everything might be chosen for its efficient resource utilization in environments where resource contention can be managed effectively.
+
+<a name="oauth-and-openid-connect"></a>
+## OAuth 2.0 and OpenID Connect
+
+### Resources
+- [OAuth 2.0 RFC6749](https://datatracker.ietf.org/doc/html/rfc6749)
+- Upcoming version: OAuth 2.1
+
+### Overview of OAuth 2.0 and OpenID Connect (OIDC)
+OAuth 2.0 and OpenID Connect are standards for secure authorization and authentication on the internet. OAuth 2.0 provides authorization flows for web, desktop, mobile applications, and smart devices, while OpenID Connect is built on top of OAuth 2.0 and adds an identity layer for authenticating users.
+
+### Use Cases
+
+#### OIDC for User Authentication
+- Delegates user authentication to external identity providers, such as social logins (Google, Facebook) or enterprise Single Sign-On (SSO).
+- The application receives an identity token to confirm user identity.
+- Uses only OpenID Connect.
+
+#### OAuth for API Access
+- Allows applications to act on behalf of the user to use an API.
+- Uses only OAuth.
+
+#### OIDC + OAuth for Authentication and API Access
+- The application receives both an identity token and an access token.
+- Used for applications that need to authenticate the user and access APIs on their behalf, such as mobile apps.
+
+### OAuth and OIDC Flows (Grants)
+
+- Implicit Flow (deprecated in OAuth 2.1)
+- Resource Owner Password Credentials Flow
+- **Authorization Code Flow (recommended)**
+- Client Credentials Flow (for service-to-service communication)
+- Device Flow (for devices without browsers)
+- Client-Initiated Backchannel Authentication (CIBA) Flow
+
+### Authorization Code Flow with OAuth 2.0
+
+1. **Initialization**: A request by the user or application starts the flow for accessing a protected resource.
+2. **STS Redirection**: The application redirects the user to the Security Token Service (STS) to authenticate.
+3. **STS Request**: The STS initializes the authentication process upon the request.
+4. **Authentication Challenge**: The STS prompts the user to authenticate.
+5. **User Credentials**: The user submits their credentials to the STS.
+6. **Authorization Code Issuance**: The STS issues an authorization code after successful authentication.
+7. **Client Callback**: The user's browser is redirected to the application's callback endpoint.
+8. **Token Exchange**: The application exchanges the authorization code for tokens.
+9. **Token Issuance**: The STS issues the appropriate tokens for the use case.
+10. **Token Handling**: The application handles the tokens as required by the use case.
+
+### Securing OAuth with PKCE
+
+Proof Key for Code Exchange (PKCE) secures the Authorization Code flow, particularly for public clients that cannot securely store a client secret.
+
+#### PKCE Flow Steps
+
+1. **Code Verifier Creation**: The client generates a cryptographically random string as the code verifier.
+2. **Code Challenge Calculation**: The client calculates a SHA256 hash of the code verifier to create the code challenge.
+3. **Authorization Request**: The client starts the flow by sending the code challenge to the STS during the authorization request.
+4. **Code Verifier Storage**: The client securely stores the code verifier, associating it with the user's session.
+5. **STS Authentication**: The STS prompts the user for authentication and receives the code challenge.
+6. **User Authentication**: The user authenticates with the STS.
+7. **Code Challenge Association**: The STS stores the code challenge with the issued authorization code.
+8. **Redirect to Client**: The STS redirects the user to the client with the authorization code.
+9. **Code Exchange**: The client sends the authorization code and code verifier to the STS.
+10. **Code Challenge Verification**: The STS validates the code verifier against the stored code challenge.
+11. **Token Issuance**: The STS issues the tokens if the code verifier is confirmed.
+
+#### PKCE Details
+
+- Code verifier: A high-entropy cryptographic random string, between 43 and 128 characters.
+- Code challenge: A Base64 URL-encoded SHA256 hash of the code verifier, ensuring a secure connection between the challenge and verifier.
+
+### Conclusion
+
+OAuth 2.0 and OIDC provide a framework for secure user authentication and authorization across different applications and services. The introduction of PKCE in the OAuth flow adds additional security, ensuring that the authorization process is protected against interception and unauthorized code exchange, making it suitable for modern application architectures.
