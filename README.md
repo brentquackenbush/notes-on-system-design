@@ -347,6 +347,78 @@ Proof Key for Code Exchange (PKCE) secures the Authorization Code flow, particul
 - Code verifier: A high-entropy cryptographic random string, between 43 and 128 characters.
 - Code challenge: A Base64 URL-encoded SHA256 hash of the code verifier, ensuring a secure connection between the challenge and verifier.
 
-### Conclusion
+### Refresh Token Flow
 
-OAuth 2.0 and OIDC provide a framework for secure user authentication and authorization across different applications and services. The introduction of PKCE in the OAuth flow adds additional security, ensuring that the authorization process is protected against interception and unauthorized code exchange, making it suitable for modern application architectures.
+The Refresh Token Flow in OAuth 2.0 is a critical mechanism designed to provide applications with new access tokens without further user interaction. This process ensures that even if an access token is compromised, it has a limited window of vulnerability.
+
+#### Detailed Steps:
+
+1. **Request New Access Token**: When an access token nears expiration, the client application requests a new one by sending the refresh token along with its authentication credentials to the Security Token Service (STS).
+
+2. **Access Token Issued**: Upon successful validation of the refresh token and client credentials, the STS issues a new access token.
+
+3. **API Request with New Access Token**: The client uses the new access token to securely access the backend API.
+
+4. **API Response**: The backend processes the API call and returns the response to the client.
+
+#### Strategic Notes on Refresh Tokens:
+
+- **Proactive Token Refresh**: Client applications typically request a new access token before the current one expires, minimizing downtime.
+
+- **Infrequent One-Shot Access**: For sporadic API access, clients might avoid storing access tokens and instead use a refresh token to request a new access token as needed.
+
+#### Security Considerations:
+
+- **Sensitivity**: Refresh tokens should be protected as stringently as user credentials, as they allow for the issuance of new access tokens.
+
+- **Compromise Impact**: If both the refresh token and client authentication credentials are compromised, users are exposed to significant risk.
+
+- **Confidential Storage**: Ensuring the secure storage of refresh tokens is a minimal security requirement, typically achieved through encryption and secure storage practices.
+
+### User Sessions with the STS
+
+The management of user sessions is exclusively under the control of the STS, which dictates how sessions are created, maintained, and terminated.
+
+#### Considerations:
+
+- **Active Sessions**: As long as the user maintains an active session with the STS, no logout occurs, and the session can be reused for subsequent authorization flows.
+
+- **Single Logout**: Deciding to implement Single Logout is often necessary for application architectures, where logging out from one application should terminate sessions across all applications.
+
+### The 'Prompt' Parameter
+
+The `prompt` parameter influences user interaction during the authentication process, defined in the OIDC specification and commonly supported by OAuth 2.0:
+
+- **Options**:
+   - `none`: No user interaction is required, suitable for silent authentication.
+   - `login`: The user is prompted to re-authenticate.
+   - `consent`: The user is asked to grant permission again.
+   - `select_account`: The user is prompted to select an account.
+
+### OAuth 2.0 and OIDC for Mobile Apps
+
+Mobile applications use a variant of the Authorization Code Flow with PKCE, which is optimized for environments where securely storing secrets is not feasible.
+
+#### Detailed Steps for Mobile Apps:
+
+1. **Embedded System Browser**: A web view is launched to initiate authentication with the STS, creating a secure environment separate from the main browser.
+
+2. **Code Challenge Creation**: The mobile app generates a code verifier and calculates its SHA256 hash, known as the code challenge, enhancing security through PKCE.
+
+3. **Secure Storage of Verifier**: The code verifier is securely stored on the device, ensuring that only an application with the correct verifier can exchange the authorization code for tokens.
+
+4. **Authentication Request**: The mobile app requests user authentication from the STS, initiating the flow.
+
+5-6. **User Credentials**: The user provides their credentials to the STS for authentication.
+
+7. **Code Challenge Association**: The STS associates the authorization code with the code challenge, linking the authentication process to the initial request.
+
+8-9. **Redirect and Authorization Code**: Upon successful authentication, the STS redirects back to the app with the authorization code.
+
+10. **Code Exchange**: The mobile app exchanges the authorization code and code verifier for tokens.
+
+11. **Verifier Validation**: The STS validates the code verifier against the stored code challenge to ensure the integrity of the token exchange process.
+
+12. **Token Issuance**: The STS issues the access and refresh tokens to the mobile app.
+
+13. **Token Handling**: The app securely handles the tokens, using the access token for API requests and the refresh token for obtaining new access tokens.
