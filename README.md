@@ -1,15 +1,17 @@
 # SystemDesignNotes
 
 ## Table of Contents
-1. [Indexing Data Structures in Database Systems](#indexing-data-structures-in-database-systems)
-    - [Skiplist](#skiplist)
-    - [Hash Index](#hash-index)
-    - [SSTable (Sorted String Table)](#sstable-sorted-string-table)
-    - [LSM tree (Log-Structured Merge-Tree)](#lsm-tree-log-structured-merge-tree)
-    - [B-tree](#b-tree)
-    - [Inverted Index](#inverted-index)
-    - [Suffix Tree](#suffix-tree)
-    - [R-tree](#r-tree)
+1. [Database Systems](#database-systems)
+   - [Indexing Data Structures in Database Systems](#indexing-data-structures-in-database-systems)
+     - [Skiplist](#skiplist)
+     - [Hash Index](#hash-index)
+     - [SSTable (Sorted String Table)](#sstable-sorted-string-table)
+     - [LSM tree (Log-Structured Merge-Tree)](#lsm-tree-log-structured-merge-tree)
+     - [B-tree](#b-tree)
+     - [Inverted Index](#inverted-index)
+     - [Suffix Tree](#suffix-tree)
+     - [R-tree](#r-tree)
+   - [Choosing a Database for System Design](#choosing-a-database-for-system-design)
 2. [Cache](#cache)
     - [Client Apps (Browser Caching)](#client-apps-browser-caching)
     - [Content Delivery Network (CDN)](#content-delivery-network-cdn)
@@ -29,98 +31,82 @@
 8. [Comparison and Context in Distributed Systems](#comparison-and-context-in-distributed-systems)
 9. [OAuth 2.0 and OpenID Connect](#oauth-20-and-openid-connect)
 
+<a name="database-systems"></a>
+## Database Systems
+This section covers fundamental and advanced topics related to database systems, focusing on indexing data structures critical for performance optimization and criteria for selecting appropriate database systems for specific system design requirements.
+
 <a name="indexing-data-structures-in-database-systems"></a>
-## Indexing Data Structures in Database Systems
+### Indexing Data Structures in Database Systems
 
-A comprehensive understanding of indexing data structures is crucial for database management and system design. Below, we discuss various data structures and their significance in indexing.
+Indexing is a technique used to speed up the retrieval of records by reducing the number of disk accesses. Different data structures support various indexing methods, each with its own set of advantages and limitations.
 
-### Skiplist
+#### SSTable (Sorted String Table)
+- **Data Structure:** Consists of immutable, sorted key-value pairs stored on disk, designed to support efficient sequential reads and range queries.
+- **Pros:** Offers high throughput for read operations, especially beneficial for range scans. SSTables support efficient disk storage through compaction, which merges multiple SSTables, reducing storage overhead and improving read performance.
+- **Cons:** Writing data initially requires more time since it involves writing to an in-memory structure first (such as a MemTable in LSM trees) before being flushed to disk as SSTables. This process can introduce latency in write operations.
+- **Technologies:**
+    - **Google's Bigtable:** A distributed storage system for managing structured data that scales to a very large size.
+    - **Apache Cassandra and Apache HBase:** NoSQL databases that use SSTables for efficiently storing data on disk, enabling effective range queries and data compaction.
 
-**What it is:**
-A skiplist is a data structure that allows fast search within an ordered sequence of elements. It consists of multiple layers with the bottom layer containing all elements and each higher layer serving as an express lane with fewer elements for quicker access.
 
-**Analogy:**
-It's like a multi-level shopping mall where express escalators take you past a selection of floors directly to your destination level quickly.
+#### LSM tree (Log-Structured Merge-Tree)
+- **Data Structure:** Integrates a memory-resident structure (e.g., a balanced binary search tree or skiplist) with SSTable-based disk storage. Writes are first recorded in the memory-resident structure and then flushed to disk as SSTables once a certain threshold is reached.
+- **Pros:**  Provides superior write performance by buffering writes in memory and reducing disk I/O through batched writes and compaction. Ideal for write-heavy applications where write throughput is critical.
+- **Cons:** Read operations, particularly point lookups, can be slower due to the need to search across multiple components (in-memory structure, multiple SSTables). Compaction processes, while optimizing storage and read performance, can consume significant system resources.
+- **Technologies:**
+    - **Apache Cassandra:** A distributed NoSQL database designed for handling large amounts of data across many commodity servers.
+    - **RocksDB and LevelDB:** High performance embedded databases for key-value data, using LSM trees for managing write-heavy workloads with efficient disk writes and compactions.
 
-**Use case:**
-Used in Redis for its capabilities of fast insertion, deletion, and lookup operations which are vital for a caching system's performance.
+#### B-tree
+- **Data Structure:** A self-balancing tree that maintains data in a sorted order, allowing for efficient searches, sequential access, and insertions/deletions. Each node can have more than two children, reducing the tree's height and disk reads.
+- **Pros:** Highly efficient for a balanced mix of read and write operations due to its ability to maintain sorted data and support logarithmic time complexity for basic operations. B-trees are widely used in relational database systems.
+- **Cons:** While B-trees minimize disk I/O by keeping the tree height low, they can still be disk I/O intensive for very large datasets. Balancing the tree during insertions and deletions adds overhead.
+- **Technologies:**
+    - **Oracle Database, PostgreSQL, and MySQL:** Relational database management systems that employ B-trees for indexing table data, supporting efficient access patterns for both point queries and range queries.
 
-### Hash Index
 
-**What it is:**
-A hash index is implemented using a hash table where a hash function maps keys to array indices correlating to value storage locations.
+#### Skiplist
+- **Data Structure:**  A probabilistic alternative to balanced trees, skiplists consist of multiple levels of linked lists, where each level is a subset of the level below, allowing for logarithmic search times.
+- **Pros:** Simplified implementation compared to balanced trees, with efficient support for insertions, deletions, and searches. Skiplists are used in databases like Redis for sorted sets.
+- **Cons:** The probabilistic nature of skiplists means that performance guarantees are not deterministic. Additionally, skiplists require extra memory for pointers.
+- **Technologies:**
+    - **Redis:** An in-memory data structure store, using skiplists for implementing sorted sets, facilitating efficient range queries and sorted data manipulation.
 
-**Analogy:**
-Like a book index that tells you the exact pages to find a word on, allowing direct access without needing to read the entire book.
+#### Hash Index
+- **Data Structure:** Employs a hash table where a hash function is used to map keys directly to an array of buckets or slots, facilitating immediate access to the value associated with a given key.
+- **Pros:** Offers constant time complexity (O(1)) for search, insert, and delete operations on average, making it highly efficient for point queries with known keys.
+- **Cons:** Not suitable for range queries. Handling collisions (when multiple keys hash to the same value) can complicate the implementation and impact performance.
+- **Technologies:**
+    - **MongoDB:** A document-oriented NoSQL database that uses hash indexes to support efficient equality queries.
+    - **Memcached:** An in-memory key-value store for small chunks of arbitrary data, utilizing hash tables for rapid data retrieval.
 
-**Use case:**
-Ideal for direct point queries with known keys, typically employed for primary key lookups in databases.
+#### Inverted Index
+- **Data Structure:** A mapping from content (such as words or terms) to its locations in a database or set of documents. Essentially, it inverts the data structure to enable efficient full-text search.
+- **Pros:** Crucial for search engines, enabling quick full-text searches by directly pointing to locations of terms across documents.
+- **Cons:** The size of the index can grow significantly with the corpus size, requiring substantial processing power to update and maintain.
+- **Technologies:**
+    - **Elasticsearch and Apache Lucene:** Search engines that leverage inverted indexes for fast full-text searching capabilities across extensive datasets, making them highly efficient for search operations.
 
-### SSTable (Sorted String Table)
+#### Suffix Tree
+- **Data Structure:** Represents all possible suffixes of a given text in a compressed trie, allowing for efficient substring and pattern matching queries.
+- **Pros:** Highly efficient for operations that involve searching for patterns within text, such as DNA sequence analysis or text editing applications.
+- **Cons:** Complex to implement and can be space-intensive, although advanced variants like the suffix array offer more space-efficient alternatives.
+- **Technologies:**
+    - **Bioinformatics tools (e.g., BLAST):** Utilize suffix trees for DNA sequencing and pattern matching, aiding in the analysis of biological sequences.
+    - **Text editing software:** Employs suffix trees for efficient substring search operations, although specific software names are less commonly cited in generic descriptions.
 
-**What it is:**
-An SSTable is a read-only data structure storing key-value pairs in sorted order on disk, facilitating efficient range queries.
+#### R-tree
+- **Data Structure:** A balanced tree structure optimized for indexing spatial data, such as geographical coordinates, rectangles, or polygons. It organizes spatial data by nesting bounding boxes.
+- **Pros:** Enables efficient processing of spatial queries, including range searches, nearest neighbor searches, and intersection queries.
+- **Cons:** The complexity of balancing the tree and managing overlapping bounding boxes can impact performance, especially with high-dimensional data.
+- **Technologies:**
+    - **PostGIS:** A spatial database extender for PostgreSQL, using R-trees for indexing spatial data such as geographical locations and maps.
+    - **Spatial indexing in MongoDB:** Supports geospatial queries and data management by utilizing R-trees for efficient spatial operations.
 
-**Analogy:**
-Similar to a telephone directory that lists contacts by last name, enabling quick searches for a set of surnames like all names starting with "M".
+<a name="choosing-a-database-for-system-design"></a>
+### Choosing a Database for System Design
+This new section will delve into criteria for selecting a database, considering aspects such as data model compatibility, scalability, performance requirements, and consistency guarantees. It will explore different types of databases (relational, NoSQL, NewSQL, time-series, graph, etc.) and their fit for various
 
-**Use case:**
-Used by systems like Bigtable and Cassandra for managing large datasets where sorted data enhances the efficiency of range scans.
-
-### LSM tree (Log-Structured Merge-Tree)
-
-**What it is:**
-An LSM tree is a strategy that combines the in-memory efficiency of skiplists for writes with the on-disk persistence and organization of SSTables.
-
-**Analogy:**
-Comparable to jotting quick notes on sticky notes (in-memory) and later sorting and pasting them into a journal (on-disk) at the day's end.
-
-**Use case:**
-Optimized for environments with high write volume, reducing disk I/O which is common in databases like LevelDB.
-
-### B-tree
-
-**What it is:**
-A B-tree is a self-balancing tree structure that keeps data sorted and allows efficient operations logarithmically with respect to the number of items.
-
-**Analogy:**
-Resembles a filing cabinet with well-organized folders allowing quick access, addition, or removal of files.
-
-**Use case:**
-Widely used in SQL databases such as MySQL for achieving consistent performance across read and write operations.
-
-### Inverted Index
-
-**What it is:**
-An inverted index associates content like words or numbers with locations in a document or a set of documents.
-
-**Analogy:**
-Works as the reverse of a book index by providing the locations of words across documents, instead of content for a specific page.
-
-**Use case:**
-Extremely useful in search engines such as Lucene, which is at the core of Elasticsearch, for full-text searches.
-
-### Suffix Tree
-
-**What it is:**
-A suffix tree represents all possible suffixes of a given string as paths from a common root, optimizing substring searches.
-
-**Analogy:**
-Imagine a family tree for words, with endings branching out, showing the lineage or pattern connection for substrings.
-
-**Use case:**
-Primarily used for quick pattern searches in strings, such as DNA sequencing in bioinformatics.
-
-### R-tree
-
-**What it is:**
-An R-tree indexes spatial data, handling dimensions efficiently for queries on geographic location-based data.
-
-**Analogy:**
-Like a map sectioned into areas and subareas, an R-tree assists in location-based queries within specified bounds.
-
-**Use case:**
-Employed in GIS, spatial database access, and for indexing multidimensional information in computer graphics.
 
 <a name="cache"></a>
 ## Cache
