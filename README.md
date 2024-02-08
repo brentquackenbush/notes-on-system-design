@@ -124,6 +124,18 @@ SQL (Structured Query Language) databases, also known as relational databases, h
 
 - **Indexing with B-trees:** SQL databases commonly use B-trees for indexing, which allows for efficient data retrieval. B-trees help in maintaining a balanced tree structure that reduces the time complexity of search, insert, and delete operations to O(log n), where n is the number of entries in the database.
 
+**Pros:**
+
+- **Data Integrity and Reliability:** Thanks to ACID guarantees, SQL databases are highly reliable for critical applications where data accuracy and integrity are non-negotiable.
+- **Complex Querying:** The relational model and SQL language allow for complex queries and data analysis, making it easier to derive meaningful insights from related data.
+- **Standardization:** SQL is a widely understood and standardized language, making it easier for developers and database administrators to work with various SQL databases without steep learning curves.
+
+**Cons:**
+
+- **Scalability Challenges:** While modern SQL databases have made significant strides in horizontal scalability, they traditionally face challenges in scaling out compared to NoSQL solutions, especially for write-heavy applications.
+- **Performance Overhead:** The mechanisms that ensure data consistency and integrity, such as locking and the two-phase commit protocol, can introduce performance overhead, making SQL databases slower for certain types of applications, particularly those requiring high throughput and low latency.
+- **Schema Rigidity:** SQL databases require a predefined schema, which can make them less flexible when dealing with rapidly evolving data models or unstructured data.
+
 #### NoSQL Databases
 
 As the digital landscape continues to evolve, NoSQL databases have emerged as pivotal components within modern data management strategies. Characterized by their schema-less nature, these databases offer flexible solutions to data storage and retrieval, catering to a wide range of applications from web services to big data processing. Their design principles diverge significantly from traditional relational databases, prioritizing scalability, performance, and ease of development.
@@ -159,18 +171,6 @@ As the digital landscape continues to evolve, NoSQL databases have emerged as pi
 - **Data Consistency:** Achieving strict data consistency can be challenging in distributed NoSQL systems, requiring careful selection of consistency models based on application requirements.
 - **Complexity in Transaction Support:** Comprehensive transaction support, especially for operations spanning multiple data items, can be more complex to implement compared to traditional SQL databases.
 - **Operational Overhead:** Managing and optimizing NoSQL databases, particularly in distributed environments, can introduce operational complexities, necessitating specialized skills and tools.
-
-**Pros:**
-
-- **Data Integrity and Reliability:** Thanks to ACID guarantees, SQL databases are highly reliable for critical applications where data accuracy and integrity are non-negotiable.
-- **Complex Querying:** The relational model and SQL language allow for complex queries and data analysis, making it easier to derive meaningful insights from related data.
-- **Standardization:** SQL is a widely understood and standardized language, making it easier for developers and database administrators to work with various SQL databases without steep learning curves.
-
-**Cons:**
-
-- **Scalability Challenges:** While modern SQL databases have made significant strides in horizontal scalability, they traditionally face challenges in scaling out compared to NoSQL solutions, especially for write-heavy applications.
-- **Performance Overhead:** The mechanisms that ensure data consistency and integrity, such as locking and the two-phase commit protocol, can introduce performance overhead, making SQL databases slower for certain types of applications, particularly those requiring high throughput and low latency.
-- **Schema Rigidity:** SQL databases require a predefined schema, which can make them less flexible when dealing with rapidly evolving data models or unstructured data.
 
 <a name="cache"></a>
 ## Cache
