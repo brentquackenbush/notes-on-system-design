@@ -52,12 +52,35 @@ type Location {
   longitude: Float!
 }
 
+# The connection type wraps around the Business type to include pagination details
+type BusinessConnection {
+  edges: [BusinessEdge]
+  pageInfo: PageInfo
+}
+
+type BusinessEdge {
+  cursor: String
+  node: Business
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean
+}
+
 type Query {
   # Query to get detailed information about a business
   business(business_id: ID!): Business
 
   # Query to get a list of businesses based on location and optional filters
-  searchNearby(latitude: Float!, longitude: Float!, radius: Int, filters: SearchFilters): [Business]
+  # with cursor-based pagination
+  searchNearby(
+    latitude: Float!,
+    longitude: Float!,
+    radius: Int!,
+    after: String,
+    first: Int
+  ): BusinessConnection
 }
 
 type Mutation {
@@ -91,31 +114,56 @@ input SearchFilters {
   rating: Float
   # Any additional filters can be included as needed
 }
+
 ```
 
-Here is an example of searching for nearby businesses. I want to explain that I did not include Pagination in the GraphQL Schema, however this is how page-based Pagination would look like. We use pagination, so we don't need to query for more information than we need at the given moment. This is because a user might not want to scroll through 1000 businesses just to search for a place to eat, a top 20 would suffice, and if they don't see any options they like, they can click a button `See more results` and it will load the next page of businesses. 
+### Cursor-based Pagination Explained
+
+[Cursor-based pagination, also known as 'relay-style' pagination](https://relay.dev/graphql/connections.htm), is a method of incrementally loading data, optimal for lists that are dynamic. It improves upon traditional page-based pagination by using a 'cursor'—a pointer to a specific place in a dataset—to fetch subsequent sets of results.
+
+In our LBS (Location Based Service), here's how cursor-based pagination works:
+
+1. **Initial Request**: Users search for nearby businesses, and the server returns the first 'n' results plus a cursor associated with the last item.
+2. **Subsequent Requests**: For more results, users request the next set using the last cursor. The server returns items following that cursor, avoiding duplicates or missed items due to list changes.
+3. **Continuous Experience**: If the list of businesses updates (additions, deletions), cursor-based pagination ensures users won't see duplicates or miss new entries.
+
+**Performance Benefits:**
+
+- **Efficiency**: Cursor-based pagination can be more efficient for the server and database. It avoids over-fetching data and the 'phantom reads' that can occur with page-based pagination in dynamic datasets.
+- **Server Load**: This method can reduce server load by delivering only immediately necessary data, which is crucial under high traffic.
+- **Database Queries**: Fetching data after a specific cursor (especially an indexed one) is often faster and less resource-intensive than calculating offsets for pages, as commonly done in page-based pagination.
+
+For dynamic and extensive datasets, like those seen in proximity services, cursor-based pagination ensures users experience a smooth, consistent browsing of data without the risk of encountering duplicates or missing new entries. It also allows for more predictable performance from both the server's and database's perspective.
+
+#### Business Query with Cursor-based Pagination
 
 ```graphql
-query SearchNearbyBusinesses {
+query SearchNearbyBusinesses($latitude: Float!, $longitude: Float!, $radius: Int!, $after: String, $first: Int) {
   searchNearby(
-    latitude: 37.7749,
-    longitude: -122.4194,
-    radius: 5000,
-    page: 1,
-    pageSize: 20
+    latitude: $latitude,
+    longitude: $longitude,
+    radius: $radius,
+    after: $after,
+    first: $first
   ) {
-    businesses {
-      business_id
-      address
-      city
-      state
-      country
-      location {
-        latitude
-        longitude
+    edges {
+      cursor
+      node {
+        business_id
+        address
+        city
+        state
+        country
+        location {
+          latitude
+          longitude
+        }
       }
     }
-    cursor
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
 }
 ```
