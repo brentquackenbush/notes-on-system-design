@@ -76,3 +76,41 @@ In the context of the CAP theorem (Consistency, Availability, Partition Toleranc
     - **Battery Conservation**: Optimizing location tracking and map rendering processes to conserve battery life. This includes intelligent polling for location updates and leveraging device hardware effectively.
 
 Our non-functional requirements are designed to support a highly available, partition-tolerant system that provides accurate data and a smooth user experience while minimizing data and battery usage on client devices.
+
+## Map Details
+
+### Interpolation Method
+- **Usage**: The interpolation method is used when a user inputs an address into the system which needs to be translated into a geographic coordinate for mapping and navigation purposes.
+- **Implementation**:
+  - Backend Service: This is a server-side operation due to the computational and data requirements.
+  - Data Sources: Utilizes GIS (Geographic Information System) data, which includes detailed street networks and associated geographic coordinates.
+  - Process: When an address is received, the interpolation service calculates the approximate location by using known coordinates of the street segment and the numeric address range.
+- **Services Utilizing Interpolation**:
+  - **Search and Location Lookup**: When users search for an address or place, the interpolation system is queried to find the exact coordinates to display on the map.
+  - **Navigation Initiation**: Before starting navigation, the starting or ending address provided by the user is converted to coordinates.
+
+### Reverse Geocoding
+- **Usage**: Reverse geocoding is used to convert geographic coordinates into a human-readable address. It's typically used when the user's location is known as a latitude/longitude pair, but a readable address is needed.
+- **Implementation**:
+  - Backend Service: Like geocoding, reverse geocoding is performed server-side due to the intensive data requirements.
+  - Data Sources: References the same GIS street data but works in the opposite direction, matching coordinates to the nearest known address range.
+  - Process: Takes the latitude and longitude provided, usually from a GPS or other location-detecting service, and finds the closest address within the street network.
+- **Services Utilizing Reverse Geocoding**:
+  - **Location Sharing**: When users want to share their current location, reverse geocoding provides an address rather than just coordinates.
+  - **Location Tagging in Photos or Posts**: Apps can tag the user's location with a readable address in social media posts or photo metadata.
+  - **Incident Reporting**: If a user reports a road incident within the app, reverse geocoding translates the incident location coordinates into an address for others to understand.
+
+### Map Rendering
+- **Tile-Based Rendering**: Breaks down the map into smaller, downloadable tiles for efficient loading and minimal bandwidth usage.
+  - **Client-Side Experience**: Ensures seamless zoom and pan functionalities by preloading adjacent tiles and using caching strategies.
+
+### Navigation Algorithms
+- **Pathfinding**: Employs algorithms like Dijkstra's or A* for calculating the shortest path between two points considering various real-time factors like traffic.
+  - **Real-Time Traffic**: Integrates live traffic data to update routes dynamically.
+  - **Predictive Modelling**: Uses historical data to predict traffic conditions for future dates and times.
+
+## Services
+
+### Location Service
+
+### Navigation Service
