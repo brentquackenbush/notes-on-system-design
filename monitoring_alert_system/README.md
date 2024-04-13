@@ -103,6 +103,8 @@ Metrics are the quantitative measures of data, often used to assess the performa
 
 ### High-level Design
 
+![High Level Design](https://github.com/brentquackenbush/notes-on-system-design/assets/50753562/5b817e04-dcf2-49fd-b871-ec2a3e8e5a70)
+
 ### Metrics Collection Service
 
 The `Metrics Collection Service` forms the initial and one of the most critical components of our monitoring and alerting system. It is designed to interface with a variety of metric sources to ingest data that will be used for monitoring and analysis.
