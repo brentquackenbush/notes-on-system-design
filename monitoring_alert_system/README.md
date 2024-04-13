@@ -86,3 +86,20 @@ Internal use.
 - **Data Aggregation**: Summarizes data from multiple sources, providing statistics like averages, counts, and extremes over specific intervals.
 - **Data Visualization**: Utilizes diverse visualization tools for efficient trend recognition and system component interaction understanding.
 - **Alerting**: Notifies users about critical events or metric thresholds being reached to maintain constant awareness of system health.
+
+### Metrics: Definition and Types
+
+Metrics are the quantitative measures of data, often used to assess the performance, health, or behavior of different components within a system. Here’s an overview of the various types of metrics that a monitoring system might collect:
+
+- **Host Metrics**: These provide insights into the health and performance of individual computers, excluding the services running on them. Common host metrics include CPU usage, disk space, and memory consumption.
+
+- **Application Metrics**: These reflect the efficiency and stability of applications, such as average response times, error rates, request rates, and occurrences of service failures or restarts.
+
+- **Network Performance Metrics**: These metrics are crucial for real-time and long-term assessments of network performance, including packet loss, availability, connectivity, and throughput.
+
+- **Server Pool Metrics**: For a collective group of servers, metrics such as the number of running instances, total instance count, and scaling adjustments are monitored for efficient resource management.
+
+- **External Dependencies Metrics**: When services rely on external APIs or systems, it’s important to monitor these for service status, error rates, and response speeds.
+
+### High-level Design
+![High Level Design](High Level Design.png)
