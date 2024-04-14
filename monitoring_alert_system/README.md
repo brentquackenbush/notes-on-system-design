@@ -111,7 +111,7 @@ The `Metrics Collection Service` forms the initial and one of the most critical 
 
 #### Responsibilities
 
-- **Data Harvesting**: Actively collects or receives pushed data from metric sources, including application servers, databases, and message queues.
+- **Data Harvesting**: Actively collects or pulled/pushed data from metric sources, including application servers, databases, and message queues.
 - **Pre-processing**: Standardizes and preprocesses the data to ensure consistency. This may include tasks like normalization, timestamping, and data enrichment.
 - **Buffering and Batching**: Implements temporary storage for incoming data, allowing for batch processing which enhances the efficiency of database writes.
 
@@ -123,3 +123,77 @@ The `Metrics Collection Service` forms the initial and one of the most critical 
 - **Guaranteed Delivery**: Kafka’s delivery semantics ensure that data is either successfully processed or retried, eliminating the risk of data loss in case of system failures.
 
 > By introducing Kafka into the system design, we ensure that the Metrics Collection Service can handle high volumes of data inflow from diverse sources without compromising on data integrity or system performance.
+
+### Query Service + Database Implementation
+
+The design and implementation of the Query Service are crucial considerations in our monitoring and alerting system. This service acts as the bridge between the time-series database and the client interfaces.
+
+#### Query Service Implementation
+
+The Query Service's primary role is to decouple the time-series database from its clients, which include visualization tools and alerting systems. This separation ensures flexibility and scalability in our architecture by allowing changes to the database or client applications without impacting the other components. A cluster of query servers makes up the Query Service, handling and responding to client requests. To enhance performance, we can introduce a caching layer to temporarily store frequent query results, minimizing the load on the time-series database and expediting data retrieval.
+
+#### Rationale for Excluding a Query Service in SaaS
+
+In scenarios where we are not building a SaaS platform that requires extensive customization and multi-tenancy support, the need for a dedicated Query Service may be superfluous. Modern visualization and alerting systems come equipped with robust plugins that can interface directly with prevalent time-series databases. This can render the intermediary Query Service redundant, simplifying the system design and reducing operational complexity.
+
+#### Integration with Tools Like Prometheus
+
+An exemplar of direct integration without the need for a standalone Query Service is the combination of Grafana and Prometheus:
+
+- **Grafana-Prometheus Integration**: Grafana offers a comprehensive plugin for Prometheus that allows for direct queries against the time-series data stored in Prometheus, without necessitating a Query Service.
+
+    ```plaintext
+    Visualization (Grafana) → Prometheus → Time Series Data
+    ```
+
+- **PromQL**: Prometheus's specialized query language, PromQL, is tailored for querying time-series data. Grafana harnesses PromQL to empower users to build insightful dashboards that query Prometheus in real time.
+
+- **Alerting via Grafana**: Grafana also facilitates the assessment of metric thresholds and triggers alerts based on data from Prometheus. This integrated alerting capability further reduces the need for a distinct alerting service.
+
+#### Choosing Prometheus as the Time-Series Database
+
+The selection of Prometheus as the time-series database for our monitoring and alerting system is backed by its:
+
+- **Domain-Specific Query Language**: PromQL is purpose-built for time-series data and circumvents the complexities associated with using SQL for such datasets.
+- **Native Functionalities**: Prometheus itself includes features that would typically be delegated to a Query Service, like data aggregation and direct alerting capabilities. It allows us to simplify our system design, leaning on the strengths of Prometheus to efficiently manage time-series data.
+
+### Alert Service and Visualization Service
+
+The Alerting System is a critical component, responsible for notifying users of potential issues based on metrics thresholds. Here's how it's typically implemented:
+
+- **Rule-Based Triggering**: Alert rules are defined in configuration files, often in a YAML format, which specify the conditions and thresholds for triggering an alert.
+
+  ```yaml
+  rules:
+    - alert: InstanceDown
+      expr: up == 0
+      for: 5m
+      labels:
+        severity: page
+  ```
+  
+`Alert Manager`: Manages the lifecycle of alerts. It ingests these rules, evaluates metric values against them, and then triggers notifications.
+
+`Alert Deduplication`: To prevent alert fatigue, the system merges similar alerts (e.g., disk usage > 90% on the same instance) into a single notification.
+
+#### Utilizing Existing Tools
+Rather than building an alerting system from scratch, we can leverage existing tools:
+
+**Pre-Built Alert Managers**: Tools like Prometheus include their own alert managers that can handle alert rules and notifications out-of-the-box.
+
+#### Visualization System Implementation
+
+A Visualization System takes raw metrics and transforms them into insightful graphical representations.
+
+**Data Layer Integration**: The visualization tool sits on top of the data layer and interfaces directly with the time-series database to retrieve metrics data.
+
+**Dashboard Creation**: It allows users to build dashboards that display key metrics, like memory/CPU usage, page load time, and traffic.
+
+#### Utilizing Existing Tools
+
+The use of established visualization systems offers several advantages:
+
+`Grafana` as a Solution: Grafana is a robust visualization tool that supports a wide range of data sources, including `Prometheus`, and offers a rich set of features for creating dashboards.
+
+
+`Direct Data Source Plugins`: `Grafana`, for instance, has plugins for various time-series databases that allow users to pull data directly for visualization without additional overhead.
