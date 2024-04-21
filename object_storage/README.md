@@ -75,7 +75,7 @@ Our object storage system is structured with several key components:
 - **Authentication**: Verifies user identities.
 - **Authorization**: Validates the operations a user can perform based on their identity.
 
-### Data Store
+### Storage Service
 
 - **Function**: Manages the storage and retrieval of the actual object data, with operations keyed by the object ID (UUID).
 
@@ -91,4 +91,34 @@ Uploading an object involves several steps that interact with different parts of
 2. **Object Upload**: The client then sends another HTTP PUT request to upload the object into the created bucket.
 3. **Metadata Creation**: The system creates metadata for the new bucket and the object being uploaded.
 
-The above components and workflow outline the critical aspects of the object storage system. Together, they form a resilient, scalable, and efficient architecture that is foundational to the operation of our S3-like storage solution.
+## Downloading an Object
+
+To retrieve an object from the object storage system, the following steps are executed:
+
+1. **Client Request**: The client sends an HTTP GET request to the load balancer to download an object, specifying the bucket and object name in the request.
+2. **IAM Validation**: The API service queries the Identity and Access Management (IAM) to verify that the user has READ permission for the requested object.
+3. **Metadata Fetching**: The API service retrieves the object's UUID from the metadata service.
+4. **Data Retrieval**: The API service then fetches the object data from the data store using the UUID.
+5. **Data Delivery**: Finally, the API service returns the object data to the client in the HTTP GET response.
+
+### Example API Call for Downloading an Object
+
+```http
+GET /bucket-to-share/script.txt HTTP/1.1
+Host: foo.s3example.org
+Authorization: [authorization string]
+```
+
+### Data Store and Persistence
+The data store in an object storage system performs the following functions:
+
+**Data Retrieval**: Stores and retrieves the actual object data keyed by object ID (UUID).
+**Metadata Handling**: Accompanies each object with metadata that includes the object name, size, and other relevant information for efficient data management.
+
+### Data Organization
+
+**Object Mapping**: The system uses an object mapping table to relate object IDs to file names, start offsets, and object sizes, allowing for efficient data retrieval.
+
+### Metadata Models
+
+**Bucket and Object Tables**: The system utilizes database tables to manage buckets and objects, where the bucket table might include fields like bucket name, ID, owner, and versioning status, and the object table includes the object name, version, and associated metadata.
