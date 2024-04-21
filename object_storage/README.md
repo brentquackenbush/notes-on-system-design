@@ -14,6 +14,9 @@ This document presents a detailed system design for an object storage system aki
     - **Object Data**: The payload can be any sequence of bytes, which encapsulates the data the user wishes to store.
     - **Metadata**: Accompanies the payload and consists of a set of name-value pairs that provide essential information about the object (e.g., content type, size, creation date, permissions).
 
+![Bucket and Object Definition](https://github.com/brentquackenbush/notes-on-system-design/blob/1d188fc36a9bfdfabd534f30ad9dffffef6f1d23/object_storage/bucket-object-map.png)
+
+
 ### Versioning
 - **Definition**: Versioning is a system feature that maintains multiple versions of an object within the same bucket. This feature enhances data integrity and recovery capabilities.
 - **Activation**: Versioning is enabled at the bucket level and can be toggled by the user as per their data retention requirements.
@@ -82,6 +85,9 @@ Our object storage system is structured with several key components:
 ### Metadata Store
 
 - **Purpose**: Stores all the metadata related to objects, such as the object name, ID, version, and other pertinent information.
+
+![System Design]([https://github.com/brentquackenbush/notes-on-system-design/blob/1d188fc36a9bfdfabd534f30ad9dffffef6f1d23/object_storage/bucket-object-map.png](https://github.com/brentquackenbush/notes-on-system-design/blob/1d188fc36a9bfdfabd534f30ad9dffffef6f1d23/object_storage/S3%20Full.png
+))
 
 ## Uploading an Object Workflow
 
