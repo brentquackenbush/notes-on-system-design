@@ -86,8 +86,7 @@ Our object storage system is structured with several key components:
 
 - **Purpose**: Stores all the metadata related to objects, such as the object name, ID, version, and other pertinent information.
 
-![System Design]([https://github.com/brentquackenbush/notes-on-system-design/blob/1d188fc36a9bfdfabd534f30ad9dffffef6f1d23/object_storage/bucket-object-map.png](https://github.com/brentquackenbush/notes-on-system-design/blob/1d188fc36a9bfdfabd534f30ad9dffffef6f1d23/object_storage/S3%20Full.png
-))
+![System Design](https://github.com/brentquackenbush/notes-on-system-design/blob/1d188fc36a9bfdfabd534f30ad9dffffef6f1d23/object_storage/S3%20Full.png)
 
 ## Uploading an Object Workflow
 
